@@ -3,13 +3,26 @@ import { useEffect, useState } from 'react'
 const FollowMouse = () => {
   const [enabled, setEnabled] = useState(false)
   const [position, setPosition] = useState({ x: 0, y: 0 })
+  // agregado para seguir caja roja
+  const [score, setScore] = useState(0)
+  const [targetPosition, setTargetPosition] = useState({ x: 0, y: 0 })
 
   useEffect(() => {
-    console.log('effect', { enabled })
     const handlemove = (event) => {
       const { clientX, clientY } = event
-      console.log('handleMove', { clientX, clientY })
       setPosition({ x: clientX, y: clientY })
+
+      // Verificar si el cursor está sobre el cuadrado objetivo
+      if (
+        clientX > targetPosition.x &&
+      clientX < targetPosition.x + 50 &&
+      clientY > targetPosition.y &&
+      clientY < targetPosition.y + 50
+      ) {
+      // Incrementar el puntaje y mover el cuadrado objetivo
+        setScore((prevScore) => prevScore + 1)
+        setTargetPosition(getRandomPosition())
+      }
     }
     if (enabled) {
       window.addEventListener('pointermove', handlemove)
@@ -18,7 +31,21 @@ const FollowMouse = () => {
     return () => {
       window.removeEventListener('pointermove', handlemove)
     }
-  }, [enabled])
+  }, [enabled, targetPosition])
+
+  const getRandomPosition = () => {
+    const maxX = window.innerWidth - 50
+    const maxY = window.innerHeight - 50
+    const x = Math.floor(Math.random() * maxX)
+    const y = Math.floor(Math.random() * maxY)
+    return { x, y }
+  }
+
+  const handleButtonClick = () => {
+    setEnabled(!enabled)
+    setTargetPosition(getRandomPosition())
+    setScore(0)
+  }
 
   return (
     <>
@@ -38,7 +65,30 @@ const FollowMouse = () => {
         }
       }
       />
-      <button onClick={() => setEnabled(!enabled)}>
+      {enabled && (
+        <div
+          style={{
+            position: 'absolute',
+            backgroundColor: 'red',
+            width: 50,
+            height: 50,
+            left: targetPosition.x,
+            top: targetPosition.y
+          }}
+        />
+      )}
+      <div
+        style={{
+          position: 'absolute',
+          top: 10,
+          right: 10,
+          color: '#fff',
+          fontSize: 18
+        }}
+      >
+        Puntaje: {score}
+      </div>
+      <button onClick={handleButtonClick}>
         {enabled ? 'Desactivar' : 'Activar'} seguir puntero
       </button>
     </>
