@@ -1,46 +1,34 @@
 import './App.css'
 import { Movies } from './components/Movies.jsx'
 import { useMovies } from './hooks/useMovies.js'
-import { useEffect, useState, useRef } from 'react' 
-
-
-export function useSearch () {
-  const [search, updateSearch] = useState('') 
-  const [error, setError] = useState(null)
-  const isFirstInput = useRef(true)
-
-  useEffect(() => {
-
-    if (isFirstInput.current) {
-      isFirstInput.current = search === ''
-      return
-    }
-
-    if (search === '') {
-      setError('No se puede buscar una película vacía')
-      return
-    }
-    if (search.length < 3) {
-      setError('Escribe al menos 3 caracteres')
-      return
-    }
-    setError(null)
-  },[search])
-
-  return { search, updateSearch, error }
-}
-
+import {  useCallback, useState } from 'react' 
+import { useSearch } from './hooks/useSearch.js'
+import debounce from 'just-debounce-it'
 
 
 function App() {
-  const { movies } = useMovies()
+  const [sort, setSort] = useState(false)
+
   const { search, updateSearch, error } = useSearch()
+  const { movies, getMovies, loading } = useMovies({search,sort})
+
+  const debounceGetMovies = useCallback(
+    debounce(search => {
+      getMovies({ search })
+    },500)
+    ,[getMovies]
+  )
+  
   
 
   const handleSubmit = (event) => {
     event.preventDefault()
-    console.log({search})
+    getMovies({ search })
 
+  }
+
+  const handleSort = () => {
+    setSort(!sort)
   }
 
   /*
@@ -53,7 +41,9 @@ function App() {
   */
 
   const handleChange = (event) => {
-    updateSearch(event.target.value)
+    const newSearch = event.target.value
+    updateSearch(newSearch)
+    debounceGetMovies(newSearch)
   }
 
   
@@ -70,12 +60,13 @@ function App() {
               }} onChange={handleChange} value={search} name='query' placeholder='Avengers, 
               Star Wars, The Matrix ...'
             />
+            <input type='checkbox' onChange={handleSort} checked={sort}/>
             <button type='submit'>Search</button>
           </form>
           {error && <p style={{color: 'red'}}>{error}</p>}
       </header>
       <main>
-        <Movies movies={movies}/>
+        {loading ? <p>Cargando ...</p> : <Movies movies={movies}/>}
       </main>
     </div>
   )
