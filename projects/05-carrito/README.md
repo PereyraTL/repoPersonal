@@ -2,13 +2,13 @@
 
 1. Ecommerce
 
-- Muestra una lista de productos que vienen de un JSON
-- Añade un filtro por categoria
-- Idem por precio
+✔ Muestra una lista de productos que vienen de un JSON
+✔ Añade un filtro por categoria
+✔ Idem por precio
 
 Haz uso de useContext para evitar pasar props inncesarias
 
-2. Shopping Cart
+1. Shopping Cart
 
 - haz que se puedan añadir los productos a un carrito
 - haz que se puedan eliminar los prod del carrito
